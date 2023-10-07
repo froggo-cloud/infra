@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  traefik:
+    image: traefik:v2.10.4
+    restart: unless-stopped
+    command:
+      - --log.level=INFO 
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --certificatesresolvers.letsencryptresolver.acme.email=acme@froggo.cloud
+      - --certificatesresolvers.letsencryptresolver.acme.storage=certificates.json
+      - --certificatesresolvers.letsencryptresolver.acme.tlschallenge=true
+    networks:
+      - traefik
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - "traefik-data:/etc/traefik/"
+
+networks:
+  traefik:
+    name: traefik
+
+volumes:
+  traefik-data:
